@@ -1,40 +1,43 @@
-/* HimStack company website */
 :root {
-  color-scheme: light;
-  --bg: #f6f8fb;
-  --surface: rgba(255, 255, 255, 0.78);
-  --surface-strong: #ffffff;
-  --text: #111827;
-  --muted: #5b6475;
-  --heading: #07111f;
-  --line: rgba(15, 23, 42, 0.1);
-  --primary: #0f5bd8;
-  --primary-2: #0f9f9a;
+  color-scheme: dark;
+  --bg: #0b0f19;
+  --surface: rgba(17, 24, 39, 0.65);
+  --surface-strong: #0f172a;
+  --text: #e2e8f0;
+  --muted: #94a3b8;
+  --heading: #f8fafc;
+  --line: rgba(255, 255, 255, 0.07);
+  --primary: #6366f1;
+  --primary-2: #14b8a6;
   --accent: #f59e0b;
-  --success: #18a058;
+  --success: #10b981;
   --danger: #ef4444;
-  --nav: rgba(255, 255, 255, 0.72);
-  --shadow: 0 24px 80px rgba(15, 23, 42, 0.12);
-  --shadow-soft: 0 12px 36px rgba(15, 23, 42, 0.08);
-  --radius: 8px;
-  --radius-lg: 14px;
+  --nav: rgba(11, 15, 25, 0.75);
+  --shadow: 0 24px 60px rgba(0, 0, 0, 0.5);
+  --shadow-soft: 0 12px 30px rgba(0, 0, 0, 0.35);
+  --radius: 12px;
+  --radius-lg: 20px;
   --container: 1180px;
   --font: "Inter", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   --display: "Outfit", var(--font);
+  --bg-grid: rgba(99, 102, 241, 0.04);
 }
 
-[data-theme="dark"] {
-  color-scheme: dark;
-  --bg: #070b13;
-  --surface: rgba(16, 24, 39, 0.76);
-  --surface-strong: #101827;
-  --text: #eef4ff;
-  --muted: #aab6c9;
-  --heading: #ffffff;
-  --line: rgba(255, 255, 255, 0.12);
-  --nav: rgba(7, 11, 19, 0.72);
-  --shadow: 0 24px 80px rgba(0, 0, 0, 0.38);
-  --shadow-soft: 0 12px 36px rgba(0, 0, 0, 0.28);
+[data-theme="light"] {
+  color-scheme: light;
+  --bg: #f8fafc;
+  --surface: rgba(255, 255, 255, 0.72);
+  --surface-strong: #ffffff;
+  --text: #1e293b;
+  --muted: #64748b;
+  --heading: #0f172a;
+  --line: rgba(15, 23, 42, 0.08);
+  --primary: #4f46e5;
+  --primary-2: #0d9488;
+  --nav: rgba(248, 250, 252, 0.78);
+  --shadow: 0 24px 60px rgba(15, 23, 42, 0.08);
+  --shadow-soft: 0 12px 30px rgba(15, 23, 42, 0.04);
+  --bg-grid: rgba(79, 70, 229, 0.03);
 }
 
 * {
@@ -52,8 +55,8 @@ body {
   font-family: var(--font);
   color: var(--text);
   background:
-    linear-gradient(90deg, rgba(15, 91, 216, 0.06) 1px, transparent 1px),
-    linear-gradient(180deg, rgba(15, 91, 216, 0.06) 1px, transparent 1px),
+    linear-gradient(90deg, var(--bg-grid) 1px, transparent 1px),
+    linear-gradient(180deg, var(--bg-grid) 1px, transparent 1px),
     linear-gradient(180deg, var(--bg), var(--bg));
   background-size: 72px 72px, 72px 72px, auto;
   overflow-x: hidden;
@@ -394,8 +397,50 @@ h6 {
   border: 1px solid var(--line);
   background: var(--surface);
   color: var(--heading);
-  display: inline-grid;
-  place-items: center;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  padding: 0;
+}
+
+.theme-toggle:hover {
+  background: var(--surface-strong);
+  border-color: color-mix(in srgb, var(--primary) 30%, transparent);
+  color: var(--primary);
+  transform: translateY(-2px);
+}
+
+.theme-toggle svg {
+  width: 20px;
+  height: 20px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2.2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.theme-toggle:hover svg {
+  transform: rotate(30deg);
+}
+
+.theme-toggle .sun-icon {
+  display: block;
+}
+
+.theme-toggle .moon-icon {
+  display: none;
+}
+
+[data-theme="light"] .theme-toggle .sun-icon {
+  display: none;
+}
+
+[data-theme="light"] .theme-toggle .moon-icon {
+  display: block;
 }
 
 .floating-social {
@@ -549,11 +594,17 @@ h6 {
 .dashboard-shell::before {
   content: "";
   position: absolute;
-  inset: 12% -8% -8% 10%;
-  border-radius: 32px;
-  background: linear-gradient(135deg, rgba(21, 94, 239, 0.18), rgba(18, 182, 203, 0.14));
-  filter: blur(24px);
+  inset: 8% -8% -8% 8%;
+  border-radius: 40px;
+  background: radial-gradient(circle, color-mix(in srgb, var(--primary) 28%, transparent) 0%, color-mix(in srgb, var(--primary-2) 15%, transparent) 70%);
+  filter: blur(42px);
   z-index: -1;
+  animation: pulseGlow 8s ease-in-out infinite alternate;
+}
+
+@keyframes pulseGlow {
+  0% { transform: scale(0.95) translate(-4px, -4px); opacity: 0.8; }
+  100% { transform: scale(1.05) translate(4px, 4px); opacity: 1; }
 }
 
 .dashboard {
@@ -562,8 +613,15 @@ h6 {
   overflow: hidden;
   background: var(--surface);
   box-shadow: var(--shadow);
-  backdrop-filter: blur(20px);
-  transform: perspective(1200px) rotateY(-8deg) rotateX(4deg);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  transform: perspective(1200px) rotateY(-6deg) rotateX(3deg);
+  transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.3s ease;
+}
+
+.dashboard:hover {
+  transform: perspective(1200px) rotateY(-2deg) rotateX(1deg) scale(1.02);
+  border-color: color-mix(in srgb, var(--primary) 20%, transparent);
 }
 
 .dash-top {
@@ -624,7 +682,8 @@ h6 {
 
 .dash-nav.active {
   height: 34px;
-  background: linear-gradient(135deg, rgba(21, 94, 239, 0.92), rgba(18, 182, 203, 0.78));
+  background: linear-gradient(135deg, var(--primary), var(--primary-2));
+  box-shadow: 0 4px 12px color-mix(in srgb, var(--primary) 25%, transparent);
 }
 
 .dash-main {
@@ -642,11 +701,21 @@ h6 {
   padding: 16px;
   border: 1px solid var(--line);
   border-radius: var(--radius);
-  background: rgba(255, 255, 255, 0.38);
+  background: rgba(255, 255, 255, 0.03);
+  transition: background 0.3s ease, transform 0.3s ease;
 }
 
-[data-theme="dark"] .metric {
-  background: rgba(255, 255, 255, 0.05);
+[data-theme="light"] .metric {
+  background: rgba(15, 23, 42, 0.02);
+}
+
+.metric:hover {
+  background: rgba(255, 255, 255, 0.07);
+  transform: translateY(-2px);
+}
+
+[data-theme="light"] .metric:hover {
+  background: rgba(15, 23, 42, 0.04);
 }
 
 .metric b {
@@ -668,16 +737,17 @@ h6 {
   gap: 12px;
   border: 1px solid var(--line);
   border-radius: var(--radius);
-  background: linear-gradient(180deg, rgba(21, 94, 239, 0.08), transparent);
+  background: linear-gradient(180deg, color-mix(in srgb, var(--primary) 8%, transparent), transparent);
 }
 
 .bar {
   flex: 1;
   min-width: 18px;
-  border-radius: 8px 8px 0 0;
+  border-radius: 6px 6px 0 0;
   background: linear-gradient(180deg, var(--primary-2), var(--primary));
-  animation: growBar 1.8s ease-in-out infinite alternate;
+  animation: growBar 2.5s cubic-bezier(0.4, 0, 0.2, 1) infinite alternate;
   transform-origin: bottom;
+  box-shadow: 0 4px 12px color-mix(in srgb, var(--primary) 15%, transparent);
 }
 
 .bar:nth-child(2) { animation-delay: 0.1s; }
@@ -795,9 +865,11 @@ h6 {
 .blog-card {
   border: 1px solid var(--line);
   border-radius: var(--radius);
-  background: var(--surface-strong);
+  background: var(--surface);
   box-shadow: var(--shadow-soft);
-  backdrop-filter: blur(18px);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.4s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.4s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .glass-card,
@@ -805,7 +877,7 @@ h6 {
 .testimonial-card,
 .blog-card,
 .job-card {
-  padding: 24px;
+  padding: 32px 28px;
 }
 
 .glass-card:hover,
@@ -813,9 +885,9 @@ h6 {
 .team-card:hover,
 .blog-card:hover,
 .job-card:hover {
-  transform: translateY(-5px);
-  transition: transform 0.25s ease, box-shadow 0.25s ease;
-  box-shadow: var(--shadow);
+  transform: translateY(-8px);
+  border-color: color-mix(in srgb, var(--primary) 30%, transparent);
+  box-shadow: 0 20px 40px color-mix(in srgb, var(--primary) 12%, transparent), var(--shadow);
 }
 
 .stat-card {

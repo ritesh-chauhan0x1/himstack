@@ -21,10 +21,26 @@ document.addEventListener("DOMContentLoaded", () => {
     navMenu.prepend(menuHeader);
   }
 
-  root.dataset.theme = "light";
+  // Theme Management (Default: dark)
+  const savedTheme = localStorage.getItem("theme") || "dark";
+  root.dataset.theme = savedTheme;
+
+  // Delegate click for theme toggle button
+  document.addEventListener("click", (e) => {
+    const toggleBtn = e.target.closest(".theme-toggle");
+    if (!toggleBtn) return;
+    
+    const currentTheme = root.dataset.theme || "dark";
+    const newTheme = currentTheme === "dark" ? "light" : "dark";
+    
+    root.dataset.theme = newTheme;
+    localStorage.setItem("theme", newTheme);
+  });
 
   // Click Spark Effect
   document.addEventListener("click", (e) => {
+    if (e.target.closest("button") || e.target.closest("a") || e.target.closest(".theme-toggle")) return;
+
     const spark = document.createElement("div");
     spark.className = "click-spark";
     spark.style.left = `${e.clientX}px`;
