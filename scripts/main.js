@@ -1,3 +1,5 @@
+const SPREADSHEET_URL = ""; // Paste your Google Apps Script Web App URL here (e.g., https://script.google.com/macros/s/.../exec)
+
 document.addEventListener("DOMContentLoaded", () => {
   const root = document.documentElement;
   const body = document.body;
@@ -198,22 +200,73 @@ document.addEventListener("DOMContentLoaded", () => {
     document.body.appendChild(overlay);
   };
 
+  const showSuccessPopup = () => {
+    const overlay = document.createElement("div");
+    overlay.className = "custom-popup-overlay";
+    const card = document.createElement("div");
+    card.className = "custom-popup-card";
+    const icon = document.createElement("div");
+    icon.className = "custom-popup-icon success-icon";
+    icon.innerHTML = `<svg viewBox="0 0 24 24" width="32" height="32" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 11.08V12a10 10 0 11-5.93-9.14" stroke-linecap="round" stroke-linejoin="round"/><path d="M22 4L12 14.01l-3-3" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+    const title = document.createElement("h3");
+    title.textContent = "Submission Successful";
+    const msg = document.createElement("p");
+    msg.textContent = "Thank you! Your request has been recorded. The HimStack team will review it and get back to you shortly.";
+    const btn = document.createElement("button");
+    btn.className = "btn btn-primary";
+    btn.textContent = "Done";
+    btn.addEventListener("click", () => {
+      overlay.classList.add("fade-out");
+      setTimeout(() => overlay.remove(), 300);
+    });
+    card.appendChild(icon);
+    card.appendChild(title);
+    card.appendChild(msg);
+    card.appendChild(btn);
+    overlay.appendChild(card);
+    document.body.appendChild(overlay);
+  };
+
   document.querySelectorAll("form").forEach((form) => {
     form.addEventListener("submit", (event) => {
       event.preventDefault();
       const button = form.querySelector("button[type='submit']");
       if (!button) return;
+      
       const isCareers = form.querySelector("#role") !== null;
       const targetEmail = isCareers ? "careers@himstack.com" : "contact@himstack.com";
       const original = button.textContent;
-      button.textContent = "Processing...";
+      
+      button.textContent = "Sending...";
       button.setAttribute("disabled", "true");
-      setTimeout(() => {
-        button.textContent = original;
-        button.removeAttribute("disabled");
-        form.reset();
-        showUnavailablePopup(targetEmail);
-      }, 800);
+
+      if (SPREADSHEET_URL) {
+        // Submit directly to Google Sheet web app
+        fetch(SPREADSHEET_URL, {
+          method: "POST",
+          body: new FormData(form),
+          mode: "no-cors"
+        })
+        .then(() => {
+          button.textContent = original;
+          button.removeAttribute("disabled");
+          form.reset();
+          showSuccessPopup();
+        })
+        .catch((error) => {
+          console.error("Sheet submission failed:", error);
+          button.textContent = original;
+          button.removeAttribute("disabled");
+          showUnavailablePopup(targetEmail);
+        });
+      } else {
+        // Fallback to offline message popup after a small delay
+        setTimeout(() => {
+          button.textContent = original;
+          button.removeAttribute("disabled");
+          showUnavailablePopup(targetEmail);
+        }, 800);
+      }
     });
   });
 });

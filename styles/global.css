@@ -1629,6 +1629,11 @@ h6 {
   place-items: center;
 }
 
+.custom-popup-icon.success-icon {
+  background: rgba(16, 185, 129, 0.15);
+  color: var(--success);
+}
+
 .custom-popup-card h3 {
   margin: 0;
   font-size: 1.35rem;
