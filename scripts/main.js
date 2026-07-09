@@ -1,5 +1,3 @@
-//const SPREADSHEET_URL = ""; // Paste your Google Apps Script Web App URL here (e.g., https://script.google.com/macros/s/.../exec)
-
 document.addEventListener("DOMContentLoaded", () => {
   const root = document.documentElement;
   const body = document.body;
@@ -23,26 +21,10 @@ document.addEventListener("DOMContentLoaded", () => {
     navMenu.prepend(menuHeader);
   }
 
-  // Theme Management (Default: dark)
-  const savedTheme = localStorage.getItem("theme") || "dark";
-  root.dataset.theme = savedTheme;
-
-  // Delegate click for theme toggle button
-  document.addEventListener("click", (e) => {
-    const toggleBtn = e.target.closest(".theme-toggle");
-    if (!toggleBtn) return;
-    
-    const currentTheme = root.dataset.theme || "dark";
-    const newTheme = currentTheme === "dark" ? "light" : "dark";
-    
-    root.dataset.theme = newTheme;
-    localStorage.setItem("theme", newTheme);
-  });
+  root.dataset.theme = "light";
 
   // Click Spark Effect
   document.addEventListener("click", (e) => {
-    if (e.target.closest("button") || e.target.closest("a") || e.target.closest(".theme-toggle")) return;
-
     const spark = document.createElement("div");
     spark.className = "click-spark";
     spark.style.left = `${e.clientX}px`;
@@ -206,15 +188,15 @@ document.addEventListener("DOMContentLoaded", () => {
     const card = document.createElement("div");
     card.className = "custom-popup-card";
     const icon = document.createElement("div");
-    icon.className = "custom-popup-icon success-icon";
-    icon.innerHTML = `<svg viewBox="0 0 24 24" width="32" height="32" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 11.08V12a10 10 0 11-5.93-9.14" stroke-linecap="round" stroke-linejoin="round"/><path d="M22 4L12 14.01l-3-3" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+    icon.className = "custom-popup-icon";
+    icon.innerHTML = `<svg viewBox="0 0 24 24" width="32" height="32" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 13l4 4L19 7" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
     const title = document.createElement("h3");
-    title.textContent = "Submission Successful";
+    title.textContent = "Message Sent";
     const msg = document.createElement("p");
-    msg.textContent = "Thank you! Your request has been recorded. The HimStack team will review it and get back to you shortly.";
+    msg.textContent = "Thank you for your message. Our team will get back to you soon.";
     const btn = document.createElement("button");
     btn.className = "btn btn-primary";
-    btn.textContent = "Done";
+    btn.textContent = "Close";
     btn.addEventListener("click", () => {
       overlay.classList.add("fade-out");
       setTimeout(() => overlay.remove(), 300);
@@ -226,63 +208,107 @@ document.addEventListener("DOMContentLoaded", () => {
     overlay.appendChild(card);
     document.body.appendChild(overlay);
   };
-document.querySelectorAll("form").forEach((form) => {
+
+  document.querySelectorAll("form").forEach((form) => {
+
+  let isSubmitting = false;
 
   form.addEventListener("submit", async (event) => {
 
     event.preventDefault();
 
+    if (isSubmitting) return;
+
+    isSubmitting = true;
+
     const button = form.querySelector("button[type='submit']");
-    const original = button.textContent;
+    const originalText = button.innerHTML;
 
     button.disabled = true;
-    button.textContent = "Sending...";
+    button.innerHTML = "Sending...";
+
+    // Original form data
+    const originalData = new FormData(form);
+
+    // Add extra information
+    originalData.append("submitted_at", new Date().toLocaleString());
+    originalData.append("browser", navigator.userAgent);
+    originalData.append("page", window.location.href);
+
+    // Duplicate data for both services
+    const sheetData = new FormData();
+    const formspreeData = new FormData();
+
+    for (const [key, value] of originalData.entries()) {
+      sheetData.append(key, value);
+      formspreeData.append(key, value);
+    }
+
+    let googleSuccess = false;
+    let formspreeSuccess = false;
 
     try {
 
-      const response = await fetch("https://formspree.io/f/xpqggwdd", {
-        method: "POST",
-        body: new FormData(form),
-        headers: {
-          Accept: "application/json"
+      // Save to Google Sheets
+      await fetch(
+        "https://script.google.com/macros/s/AKfycbxjJzCBF1n5Fs2kjQ9P-TpADhueBhJeBZr0KfbxP15t06YDL75_hDH9u-9PJpmksosIlQ/exec",
+        {
+          method: "POST",
+          body: sheetData,
+          mode: "no-cors"
         }
-      });
+      );
 
-      if (response.ok) {
+      googleSuccess = true;
 
-        form.reset();
+    } catch (error) {
 
-        showSuccessPopup();
+      console.error("Google Sheets Error:", error);
 
-      } else {
+    }
 
-        showUnavailablePopup("contact@himstack.com");
+    try {
 
-      }
+      const response = await fetch(
+        "https://formspree.io/f/xpqggwdd",
+        {
+          method: "POST",
+          body: formspreeData,
+          body: JSON.stringify(Object.fromEntries(formspreeData)), 
+          headers: {
+            Accept: "application/json"
+          }
+        }
+      );
+
+      formspreeSuccess = response.ok;
 
     } catch (error) {
 
       console.error(error);
+      showUnavailablePopup("contact@himstack.com");
+
+    }
+
+    if (googleSuccess || formspreeSuccess) {
+
+      form.reset();
+
+      showSuccessPopup();
+
+    } else {
 
       showUnavailablePopup("contact@himstack.com");
 
     }
 
     button.disabled = false;
+    button.innerHTML = originalText;
     button.textContent = original;
+
+    isSubmitting = false;
 
   });
 
 });
-
-      } else {
-        // Fallback to offline message popup after a small delay
-        setTimeout(() => {
-          button.textContent = original;
-          button.removeAttribute("disabled");
-          showUnavailablePopup(targetEmail);
-        }, 800);
-      }
-    });
-  });
 });
