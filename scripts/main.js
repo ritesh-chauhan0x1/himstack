@@ -1,4 +1,4 @@
-const SPREADSHEET_URL = ""; // Paste your Google Apps Script Web App URL here (e.g., https://script.google.com/macros/s/.../exec)
+//const SPREADSHEET_URL = ""; // Paste your Google Apps Script Web App URL here (e.g., https://script.google.com/macros/s/.../exec)
 
 document.addEventListener("DOMContentLoaded", () => {
   const root = document.documentElement;
@@ -226,39 +226,55 @@ document.addEventListener("DOMContentLoaded", () => {
     overlay.appendChild(card);
     document.body.appendChild(overlay);
   };
+document.querySelectorAll("form").forEach((form) => {
 
-  document.querySelectorAll("form").forEach((form) => {
-    form.addEventListener("submit", (event) => {
-      event.preventDefault();
-      const button = form.querySelector("button[type='submit']");
-      if (!button) return;
-      
-      const isCareers = form.querySelector("#role") !== null;
-      const targetEmail = isCareers ? "careers@himstack.com" : "contact@himstack.com";
-      const original = button.textContent;
-      
-      button.textContent = "Sending...";
-      button.setAttribute("disabled", "true");
+  form.addEventListener("submit", async (event) => {
 
-      if (SPREADSHEET_URL) {
-        // Submit directly to Google Sheet web app
-        fetch(SPREADSHEET_URL, {
-          method: "POST",
-          body: new FormData(form),
-          mode: "no-cors"
-        })
-        .then(() => {
-          button.textContent = original;
-          button.removeAttribute("disabled");
-          form.reset();
-          showSuccessPopup();
-        })
-        .catch((error) => {
-          console.error("Sheet submission failed:", error);
-          button.textContent = original;
-          button.removeAttribute("disabled");
-          showUnavailablePopup(targetEmail);
-        });
+    event.preventDefault();
+
+    const button = form.querySelector("button[type='submit']");
+    const original = button.textContent;
+
+    button.disabled = true;
+    button.textContent = "Sending...";
+
+    try {
+
+      const response = await fetch("https://formspree.io/f/xpqggwdd", {
+        method: "POST",
+        body: new FormData(form),
+        headers: {
+          Accept: "application/json"
+        }
+      });
+
+      if (response.ok) {
+
+        form.reset();
+
+        showSuccessPopup();
+
+      } else {
+
+        showUnavailablePopup("contact@himstack.com");
+
+      }
+
+    } catch (error) {
+
+      console.error(error);
+
+      showUnavailablePopup("contact@himstack.com");
+
+    }
+
+    button.disabled = false;
+    button.textContent = original;
+
+  });
+
+});
+
       } else {
         // Fallback to offline message popup after a small delay
         setTimeout(() => {
