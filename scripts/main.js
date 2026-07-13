@@ -21,7 +21,20 @@ document.addEventListener("DOMContentLoaded", () => {
     navMenu.prepend(menuHeader);
   }
 
-  root.dataset.theme = "light";
+ // Theme: restore saved preference (falls back to the dark default set in CSS)
+const THEME_KEY = "himstack-theme";
+const savedTheme = localStorage.getItem(THEME_KEY);
+if (savedTheme === "light" || savedTheme === "dark") {
+  root.dataset.theme = savedTheme;
+}
+
+document.addEventListener("click", (event) => {
+  const toggleBtn = event.target.closest(".theme-toggle");
+  if (!toggleBtn) return;
+  const isLight = root.dataset.theme === "light";
+  root.dataset.theme = isLight ? "dark" : "light";
+  localStorage.setItem(THEME_KEY, root.dataset.theme);
+});
 
   // Click Spark Effect
   document.addEventListener("click", (e) => {
